@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"io"
+	"io/ioutil"
 	"os"
 	"strconv"
 	"strings"
@@ -101,16 +102,18 @@ func DecodeFile(fpath string, v interface{}) (toml.MetaData, error) {
 	return meta, nil
 }
 
+func ParseFile(fpath string) (*nast.Table, error) {
+	contents, err := ioutil.ReadFile(fpath)
+	if err != nil {
+		return nil, err
+	}
+
+	return ntoml.Parse(contents)
+}
+
+// Kapacitor
 func NewEncoder(w io.Writer) *ntoml.Encoder {
 	return ntoml.NewEncoder(w)
-}
-
-func Unmarshal(p []byte, v interface{}) error {
-	return ntoml.Unmarshal(p, v)
-}
-
-func Parse(data []byte) (*nast.Table, error) {
-	return ntoml.Parse(data)
 }
 
 func UnmarshalTable(t *nast.Table, v interface{}) error {
