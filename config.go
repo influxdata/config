@@ -9,9 +9,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/BurntSushi/toml"
-	ntoml "github.com/naoina/toml"
-	nast "github.com/naoina/toml/ast"
+	"github.com/naoina/toml"
+	"github.com/naoina/toml/ast"
 )
 
 type Duration time.Duration
@@ -74,48 +73,46 @@ func (d Duration) String() string {
 	return time.Duration(d).String()
 }
 
-func Decode(tomlBlob string, target interface{}) (toml.MetaData, error) {
+func Decode(tomlBlob string, target interface{}) error {
 	sreader := strings.NewReader(tomlBlob)
-	decoder := ntoml.NewDecoder(sreader)
+	decoder := toml.NewDecoder(sreader)
 	err := decoder.Decode(target)
-	meta := toml.MetaData{}
 
 	if err != nil {
-		return meta, err
+		return err
 	}
 
-	return meta, nil
+	return nil
 }
 
-func DecodeFile(fpath string, v interface{}) (toml.MetaData, error) {
+func DecodeFile(fpath string, v interface{}) error {
 	file, err := os.Open(fpath)
-	meta := toml.MetaData{}
 
 	if err != nil {
-		return meta, err
+		return err
 	}
-	decoder := ntoml.NewDecoder(file)
+	decoder := toml.NewDecoder(file)
 	err = decoder.Decode(v)
 	if err != nil {
-		return meta, err
+		return err
 	}
-	return meta, nil
+	return nil
 }
 
-func ParseFile(fpath string) (*nast.Table, error) {
+func ParseFile(fpath string) (*ast.Table, error) {
 	contents, err := ioutil.ReadFile(fpath)
 	if err != nil {
 		return nil, err
 	}
 
-	return ntoml.Parse(contents)
+	return toml.Parse(contents)
 }
 
 // Kapacitor
-func NewEncoder(w io.Writer) *ntoml.Encoder {
-	return ntoml.NewEncoder(w)
+func NewEncoder(w io.Writer) *toml.Encoder {
+	return toml.NewEncoder(w)
 }
 
-func UnmarshalTable(t *nast.Table, v interface{}) error {
-	return ntoml.UnmarshalTable(t, v)
+func UnmarshalTable(t *ast.Table, v interface{}) error {
+	return toml.UnmarshalTable(t, v)
 }
