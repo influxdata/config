@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"io"
 	"io/ioutil"
+	"net/http"
 	"os"
 	"strconv"
 	"strings"
@@ -14,6 +15,10 @@ import (
 )
 
 type Duration time.Duration
+
+func (d Duration) String() string {
+	return time.Duration(d).String()
+}
 
 func (d *Duration) UnmarshalTOML(data []byte) error {
 	// Ignore if there is no value set
@@ -69,8 +74,51 @@ func (s *Size) UnmarshalTOML(data []byte) error {
 	return nil
 }
 
-func (d Duration) String() string {
-	return time.Duration(d).String()
+// Config is a configuration management object, providing services for
+// unmarshalling, remotely reading, and updating an underlying configuration
+// object
+type Config struct {
+	path string // the path of the underlying configuration file
+}
+
+// HTTP returns handlers necessary to facilitate remotely reading and updating
+// the underlying configuration object
+func (c *Config) HTTP() http.Handler {
+	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
+		switch r.Method {
+		case "GET":
+			cfgFile, err := os.Open(c.path)
+			if err != nil {
+				rw.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			defer cfgFile.Close()
+			io.Copy(rw, cfgFile)
+		case "POST":
+			cfgFile, err := os.OpenFile(c.path, os.O_WRONLY, 0666)
+			if err != nil {
+				rw.WriteHeader(http.StatusInternalServerError)
+				return
+			}
+			defer cfgFile.Close()
+			io.Copy(cfgFile, r.Body)
+		}
+	})
+}
+
+// Decode unmarshalls the underlying configuration file into the target object.
+func (c *Config) Decode(target interface{}) error {
+	return DecodeFile(c.path, target)
+}
+
+// NewConfig initializes a configuration management object for the config file
+// located at the provided path
+func NewConfig(path string) (*Config, error) {
+	_, err := os.Stat(path)
+	if err != nil {
+		return nil, err
+	}
+	return &Config{path}, nil
 }
 
 func Decode(tomlBlob string, target interface{}) error {
