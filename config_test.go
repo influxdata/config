@@ -27,7 +27,7 @@ port=8080
 `
 	cfgFile.WriteString(expect)
 
-	cfg, err := NewConfig(cfgFile.Name())
+	cfg, err := NewConfig(cfgFile.Name(), nil)
 	r.NoError(err)
 	defer os.Remove(cfgFile.Name())
 
@@ -45,7 +45,7 @@ port=8080
 
 func Test_NonexistantFile(t *testing.T) {
 	r := require.New(t)
-	_, err := NewConfig("/tmp/does/not/exist.conf")
+	_, err := NewConfig("/tmp/does/not/exist.conf", nil)
 	r.Error(err)
 }
 
@@ -55,7 +55,7 @@ func Test_RemoteUpdate(t *testing.T) {
 	r.NoError(err)
 	defer os.Remove(cfgFile.Name())
 
-	cfg, err := NewConfig(cfgFile.Name())
+	cfg, err := NewConfig(cfgFile.Name(), nil)
 	r.NoError(err)
 
 	expect := `
@@ -100,11 +100,46 @@ port=8080
 `
 	cfgFile.WriteString(expect)
 
-	cfg, err := NewConfig(cfgFile.Name())
+	cfg, err := NewConfig(cfgFile.Name(), nil)
 	r.NoError(err)
 
 	target := testConfig{}
 	cfg.Decode(&target)
 	r.Equal("localhost", target.Hostname)
 	r.Equal(uint16(8080), target.Port)
+}
+
+func Test_ExampleConfig(t *testing.T) {
+	r := require.New(t)
+	cfgDefault := testConfig{"localhost", uint16(8080)}
+
+	expect := `hostname="localhost"
+port=8080
+`
+	cfgFile, err := ioutil.TempFile("", "config")
+	r.NoError(err)
+	defer func() {
+		err := cfgFile.Close()
+		r.NoError(err)
+		os.Remove(cfgFile.Name())
+	}()
+
+	cfg, err := NewConfig(cfgFile.Name(), cfgDefault)
+	r.NoError(err)
+	r.Equal(expect, cfg.EncodeDefault())
+}
+
+func Test_ExampleConfigNil(t *testing.T) {
+	r := require.New(t)
+	cfgFile, err := ioutil.TempFile("", "config")
+	r.NoError(err)
+	defer func() {
+		err := cfgFile.Close()
+		r.NoError(err)
+		os.Remove(cfgFile.Name())
+	}()
+
+	cfg, err := NewConfig(cfgFile.Name(), struct{}{})
+	r.NoError(err)
+	r.Equal("", cfg.EncodeDefault())
 }
