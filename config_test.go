@@ -1,12 +1,14 @@
 package config
 
 import (
+	"bytes"
 	"io/ioutil"
 	"net/http"
 	"net/http/httptest"
 	"os"
 	"strings"
 	"testing"
+	"time"
 
 	"github.com/stretchr/testify/require"
 )
@@ -142,4 +144,38 @@ func Test_ExampleConfigNil(t *testing.T) {
 	cfg, err := NewConfig(cfgFile.Name(), struct{}{})
 	r.NoError(err)
 	r.Equal("", cfg.EncodeDefault())
+}
+
+// Ensure that megabyte sizes can be parsed.
+func TestSize_UnmarshalTOML_MB(t *testing.T) {
+	var s Size
+	if err := s.UnmarshalTOML([]byte("200m")); err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	} else if s != 200*(1<<20) {
+		t.Fatalf("unexpected size: %d", s)
+	}
+}
+
+// Ensure that gigabyte sizes can be parsed.
+func TestSize_UnmarshalTOML_GB(t *testing.T) {
+	var s Size
+	if err := s.UnmarshalTOML([]byte("1g")); err != nil {
+		t.Fatalf("unexpected error: %s", err)
+	} else if s != 1073741824 {
+		t.Fatalf("unexpected size: %d", s)
+	}
+}
+
+func TestConfig_Encode(t *testing.T) {
+	d := struct {
+		WriteTimeout Duration `toml:"write-timeout"`
+	}{Duration(time.Minute)}
+	buf := new(bytes.Buffer)
+	if err := NewEncoder(buf).Encode(d); err != nil {
+		t.Fatal("Failed to encode: ", err)
+	}
+	got, search := buf.String(), `write-timeout="1m0s"`
+	if !strings.Contains(got, search) {
+		t.Fatalf("Encoding config failed.\nfailed to find %s in:\n%s\n", search, got)
+	}
 }
