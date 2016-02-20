@@ -2,8 +2,6 @@ package config
 
 import (
 	"bytes"
-	"io"
-	"net/http"
 	"os"
 )
 
@@ -23,31 +21,6 @@ func NewConfig(path string, exampleDefault interface{}) (*Config, error) {
 		return nil, err
 	}
 	return &Config{path, exampleDefault}, nil
-}
-
-// HTTP returns handlers necessary to facilitate remotely reading and updating
-// the underlying configuration object
-func (c *Config) HTTP() http.Handler {
-	return http.HandlerFunc(func(rw http.ResponseWriter, r *http.Request) {
-		switch r.Method {
-		case "GET":
-			cfgFile, err := os.Open(c.path)
-			if err != nil {
-				rw.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-			defer cfgFile.Close()
-			io.Copy(rw, cfgFile)
-		case "POST":
-			cfgFile, err := os.OpenFile(c.path, os.O_WRONLY, 0666)
-			if err != nil {
-				rw.WriteHeader(http.StatusInternalServerError)
-				return
-			}
-			defer cfgFile.Close()
-			io.Copy(cfgFile, r.Body)
-		}
-	})
 }
 
 // Decode unmarshalls the underlying configuration file into the target object.
