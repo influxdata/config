@@ -6,8 +6,8 @@ import (
 	"os"
 	"strings"
 
-	"github.com/naoina/toml"
-	"github.com/naoina/toml/ast"
+	"github.com/influxdata/toml"
+	"github.com/influxdata/toml/ast"
 )
 
 // Decode unmarshals a string of TOML into a target configuration struct.

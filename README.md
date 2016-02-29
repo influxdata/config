@@ -4,7 +4,7 @@ Config
 This is the unified configuration management package for InfluxData. The
 intention of this package is to unify existing patterns of interacting with
 configuration across the elements of the TICK+E stack. As such, it implements
-the superset of APIs from both `github.com/naoina/toml` and
+the superset of APIs from both `github.com/influxdata/toml` and
 `github.com/BurntSushi/toml`, while also providing a small API for the common
 case of loading and storing configuration from a particular file. It also
 provides wrapper types for formatting Durations and Sizes in TOML, which were
