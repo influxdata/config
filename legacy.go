@@ -3,12 +3,18 @@ package config
 import (
 	"io"
 	"io/ioutil"
+	"log"
 	"os"
 	"strings"
 
 	"github.com/influxdata/toml"
 	"github.com/influxdata/toml/ast"
 )
+
+// Set a logger for any configuration related information.
+func SetLogger(l *log.Logger) {
+	toml.SetLogger(l)
+}
 
 // Decode unmarshals a string of TOML into a target configuration struct.
 func Decode(tomlBlob string, target interface{}) error {
