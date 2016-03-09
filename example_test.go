@@ -1,26 +1,13 @@
-Config
-======
+package config_test
 
-This is the unified configuration management package for InfluxData. The
-intention of this package is to unify existing patterns of interacting with
-configuration across the elements of the TICK+E stack. As such, it implements
-the superset of APIs from both `github.com/influxdata/toml` and
-`github.com/BurntSushi/toml`, while also providing a small API for the common
-case of loading and storing configuration from a particular file. It also
-provides wrapper types for formatting Durations and Sizes in TOML, which were
-previously held in a sub-package within InfluxDB. Also provided is the ability
-to document configuration fields using a "doc" struct tag. When the config
-struct is marshalled as TOML, any doc struct tags found will be inserted as
-TOML comments in an appropriate place to document the corresponding field.
+import (
+	"fmt"
+	"log"
+	"os"
 
-Usage
-=====
+	"github.com/influxdata/config"
+)
 
-It's possible to use this package like `BurntSushi/toml` or `naoina/toml` for
-backwards compatibility. However, the recommended usage going forward is as
-follows:
-
-```go
 func ExampleConfig() {
 	type DieConfig struct {
 		Sides int    `toml:"sides" doc:"Number of sides on your die"`
@@ -78,4 +65,3 @@ name = "Jim"
 	//
 
 }
-```

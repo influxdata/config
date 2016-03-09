@@ -51,8 +51,8 @@ func Test_ExampleConfig(t *testing.T) {
 	r := require.New(t)
 	cfgDefault := testConfig{"localhost", uint16(8080)}
 
-	expect := `hostname="localhost"
-port=8080
+	expect := `hostname = "localhost"
+port = 8080
 `
 	cfgFile, err := ioutil.TempFile("", "config")
 	r.NoError(err)
@@ -110,7 +110,7 @@ func TestConfig_Encode(t *testing.T) {
 	if err := NewEncoder(buf).Encode(d); err != nil {
 		t.Fatal("Failed to encode: ", err)
 	}
-	got, search := buf.String(), `write-timeout="1m0s"`
+	got, search := buf.String(), `write-timeout = "1m0s"`
 	if !strings.Contains(got, search) {
 		t.Fatalf("Encoding config failed.\nfailed to find %s in:\n%s\n", search, got)
 	}
