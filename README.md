@@ -1,6 +1,5 @@
 Config
 ======
-
 This is the unified configuration management package for InfluxData. The
 intention of this package is to unify existing patterns of interacting with
 configuration across the elements of the TICK+E stack. As such, it implements
@@ -79,3 +78,12 @@ name = "Jim"
 
 }
 ```
+
+TODO
+====
+
+There are still somethings that should be moved to this package to ensure consitancy across packages.
+
+* Environment variable handling. Currently each project allows for config to be specified via some form of env vars.
+    We should make move that logic here so it is consistent across projects.
+
