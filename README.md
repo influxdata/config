@@ -1,3 +1,5 @@
+[![GoDoc](https://godoc.org/github.com/influxdata/config?status.svg)](https://godoc.org/github.com/influxdata/config)
+
 Config
 ======
 This is the unified configuration management package for InfluxData. The
